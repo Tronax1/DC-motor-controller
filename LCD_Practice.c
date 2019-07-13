@@ -29,24 +29,20 @@
 #define lcdport PORTA
 
 //4x4 Matrix stuff/////////////////////////////////////////
+#define HIGH 1
+#define LOW 0
+#define R1 PORTBbits.RB0
+#define R2 PORTBbits.RB1
+#define R3 PORTBbits.RB2
+#define R4 PORTBbits.RB3
+#define C1 PORTBbits.RB4
+#define C2 PORTBbits.RB5
+#define C3 PORTBbits.RB6
+#define C4 PORTBbits.RB7
 
-
-
-#define X_1    PORTBbits.RB0
-#define X_2    PORTBbits.RB1
-#define X_3    PORTBbits.RB2
-#define X_4    PORTBbits.RB3
-#define Y_1    PORTBbits.RB4
-#define Y_2    PORTBbits.RB5
-#define Y_3    PORTBbits.RB6
-#define Y_4    PORTBbits.RB7
-#define Keypad_PORT          PORTB
-#define Keypad_PORT_Direction     TRISB  
-
-// Function declarations
-void InitKeypad(void);
-char keypad_scanner(void);
-char switch_press_scan(void);
+void update(unsigned char);
+void (getKey(void));
+unsigned char val = 0;
 //////////////////////////////////////////////////////////////
 
 void lcd_ini();
@@ -70,7 +66,7 @@ TRISA=0; // Configure Port A as output port
 LATA=0;
 PORTA=0;
 //ADCON1 = 15;
-//TRISB=0x0f; // configure upper nibble PortB as output, lower nibble as input
+TRISB=0xf0; // configure upper nibble PortB as output, lower nibble as input
 LATB = 0;
 PORTB = 0;
 TRISC=0; // Configure Port C as output port
@@ -80,11 +76,14 @@ TRISD = 0;
 LATD = 0;
 PORTD = 0;
 OSCCON = 0x62; //oscillation config 8MHz
+INTCON2bits.RBPU = LOW;
+WPUB = 0xF0;
 
-char key;
+
+//char key;
 
 lcd_ini(); // LCD initialization //
-InitKeypad();
+
 // write initial display message
 while(1)
 {
@@ -95,9 +94,9 @@ while(1)
 //    __delay_ms(1000);
 ////////////////////////////////////////////
     
- //Code to test keypad    
-    key = switch_press_scan();
-    lcddata(key);
+ //Code to test keypad 
+    val = 'n';
+    getKey();
     
 //////////////////////////////////////    
 }
@@ -143,297 +142,120 @@ __delay_ms(10);
 en=0;
 }
 
+void getKey(){
+    while(val =='n')
+    {
+        LATB = 0xf0;
+        if(C1 == LOW){
+            R1 = HIGH;
+            if(C1 == HIGH)
+                update('1');
+            else {
+                R1 = LOW;
+                R2 = HIGH;
+                if(C1 == HIGH)
+                    update('4');
+                else {
+                    R2 = LOW;
+                    R3 = HIGH;
+                    if(C1 == HIGH)
+                        update('7');
+                    else {
+                        R3 = LOW;
+                        R4 = HIGH;
+                        if(C1 == HIGH)
+                            update('*');
+                    }
+                }
+            }
+        }
+        //LATB = 0xf0;
+        else if(C2 == LOW){
+            R4 = LOW;
+            R1 = HIGH;
+                if(C2 == HIGH)
+                    update('2');
+                else {
+                    R1 = LOW;
+                    R2 = HIGH;
+                    if(C2 == HIGH)
+                        update('5');
+                    else{
+                        R2 = LOW;
+                        R3 = HIGH;
+                        if(C2 == HIGH)
+                            update('8');
+                        else {
+                            R3 = LOW;
+                            R4 = HIGH;
+                            if(C2 == HIGH)
+                                update('0');
+                        }
+                    }
+                }
+        }
+        //LATB = 0xf0;
+        else if(C3 == LOW){
+            R4 = LOW;    
+            R1 = HIGH;
+                if(C3 == HIGH)
+                    update('3');
+                else {
+                    R1 = LOW;
+                    R2 = HIGH;
+                    if(C3 == HIGH)
+                        update('6');
+                    else{
+                        R2 = LOW;
+                        R3 = HIGH;
+                        if(C3 == HIGH)
+                            update('9');
+                        else {
+                            R3 = LOW;
+                            R4 = HIGH;
+                            if(C3 == HIGH)
+                                update('#');
+                        }
+                    }
+                }
+        }
+        //LATB = 0xf0;
+        else if(C4 == LOW){
+            R4 = LOW;    
+            R1 = HIGH;
+                if(C4 == HIGH)
+                    update('A');
+                else {
+                    R1 = LOW;
+                    R2 = HIGH;
+                    if(C4 == HIGH)
+                        update('B');
+                    else{
+                    R2 = LOW;    
+                    R3 = HIGH;
+                        if(C4 == HIGH)
+                            update('C');
+                        else {
+                            R3 = LOW;
+                            R4 = HIGH;
+                            if(C4 == HIGH)
+                                update('D');
+                        }    
+                    }   
+                }
+        }
+        if(val!='n')
+            lcddata(val);
+        __delay_ms(300);
+    }   // end of while(1)
+}
 
-void InitKeypad(void)
+void update(unsigned char data)
 {
-	Keypad_PORT	= 0x00;	// Set Keypad port pin values zero
-	Keypad_PORT_Direction = 0xF0;	// Last 4 pins input, First 4 pins output
-
-	
-	//OPTION_REG &= 0x7F;
-}
-
-char keypad_scanner(void)	
-{	
-    
-    //Jorge's code
-//    X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 0; 	//Scan first Row
-//    X_1 = 1;
-//    __delay_ms(50);
-//	if (X_1 == 1 && Y_1 == 1) { 
-//        __delay_ms(100); 
-//        return '1'; 
-//    } //Col 1 pressed
-//	if (X_1 == 1 && Y_2 == 1) { 
-//        __delay_ms(100); 
-//        return '2'; 
-//    } //Col 2 pressed
-//	if (X_1 == 1 && Y_3 == 1) { 
-//        __delay_ms(100); 
-//        return '3'; 
-//    } //Col 3 pressed
-//	if (X_1 == 1 && Y_4 == 1) { 
-//        __delay_ms(100);  
-//        return 'A'; 
-//    } //Col 4 pressed
-//
-//	X_1 = 0; X_2 = 1;	//Scan second Row
-//    __delay_ms(50);
-//	if (X_2 == 1 && Y_1 == 1) { 
-//        __delay_ms(100); 
-//        return '4'; 
-//    }
-//	if (X_2 == 1 && Y_2 == 1) { 
-//        __delay_ms(100); 
-//         return '5'; 
-//    }
-//	if (X_2 == 1 && Y_3 == 1) { 
-//        __delay_ms(100); 
-//        return '6'; 
-//    }
-//	if (X_2 == 1 && Y_4 == 1) { 
-//        __delay_ms(100); 
-//        return 'B'; 
-//    }
-//	
-//	X_1 = 0; X_2 = 0; X_3 = 1;	
-//    __delay_ms(50);
-//	if (X_3 == 1 && Y_1 == 1) { 
-//        __delay_ms(100); 
-//        return '7'; 
-//    }
-//	if (X_3 == 1 && Y_2 == 1) { 
-//        __delay_ms(100); 
-//        return '8'; 
-//    }
-//	if (X_3 == 1 && Y_3 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_3==1); 
-//        return '9'; 
-//    }
-//	if (X_3 == 1 && Y_4 == 1) { 
-//        __delay_ms(100); 
-//        return 'C'; 
-//    }
-//	
-//	X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 1; 	
-//    __delay_ms(50);
-//	if (X_4 == 1 && Y_1 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_1==1); 
-//        return '*'; 
-//    }
-//	if (X_4 == 1 && Y_2 == 1) { 
-//        __delay_ms(100); 
-//        return '0'; 
-//    }
-//	if (X_4 == 1 && Y_3 == 1) { 
-//        __delay_ms(100); 
-//        return '#'; 
-//    }
-//	if (X_4 == 1 && Y_4 == 1) { 
-//        __delay_ms(100); 
-//        return 'D'; 
-//    }
-//	return 'n';
-    
-    
-    
-    
-    //Jason's Code
-//	X_1 = 1; X_2 = 0; X_3 = 0; X_4 = 0; 	//Scan first Row
-//    __delay_ms(50);
-//	if (Y_1 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_1==1); 
-//        return '1'; 
-//    } //Col 1 pressed
-//	if (Y_2 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_2==1); 
-//        return '2'; 
-//    } //Col 2 pressed
-//	if (Y_3 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_3==1); 
-//        return '3'; 
-//    } //Col 3 pressed
-//	if (Y_4 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_4==1); 
-//        return 'A'; 
-//    } //Col 4 pressed
-//
-//	X_1 = 0; X_2 = 1; X_3 = 0; X_4 = 0; 	//Scan second Row
-//    __delay_ms(50);
-//	if (Y_1 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_1==1); 
-//        return '4'; 
-//    }
-//	if (Y_2 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_2==1); 
-//        return '5'; 
-//    }
-//	if (Y_3 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_3==1); 
-//        return '6'; 
-//    }
-//	if (Y_4 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_4==1); 
-//        return 'B'; 
-//    }
-//	
-//	X_1 = 0; X_2 = 0; X_3 = 1; X_4 = 0; 	
-//    __delay_ms(50);
-//	if (Y_1 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_1==1); 
-//        return '7'; 
-//    }
-//	if (Y_2 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_2==1); 
-//        return '8'; 
-//    }
-//	if (Y_3 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_3==1); 
-//        return '9'; 
-//    }
-//	if (Y_4 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_4==1); 
-//        return 'C'; 
-//    }
-//	
-//	X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 1; 	
-//    __delay_ms(50);
-//	if (Y_1 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_1==1); 
-//        return '*'; 
-//    }
-//	if (Y_2 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_2==1); 
-//        return '0'; 
-//    }
-//	if (Y_3 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_3==1); 
-//        return '#'; 
-//    }
-//	if (Y_4 == 1) { 
-//        __delay_ms(100); 
-//        while (Y_4==1); 
-//        return 'D'; 
-//    }
-//
-//	return 'n'; 
-    
-    
-    //Jason modify Jorge's code
-    X_1 = 1; X_2 = 0; X_3 = 0; X_4 = 0; 	//Scan first Row
-    
-    __delay_ms(10);
-	if (Y_1 == 1) { 
-        __delay_ms(100); 
-        return '1'; 
-    } //Col 1 pressed
-	if (Y_2 == 1) { 
-        __delay_ms(100); 
-        return '2'; 
-    } //Col 2 pressed
-	if (Y_3 == 1) { 
-        __delay_ms(100); 
-        return '3'; 
-    } //Col 3 pressed
-	if (Y_4 == 1) { 
-        __delay_ms(100);  
-        return 'A'; 
-    } //Col 4 pressed
-
-	X_1 = 0; X_2 = 1;	//Scan second Row
-    __delay_ms(10);
-	if (Y_1 == 1) { 
-        __delay_ms(100); 
-        return '4'; 
-    }
-	if (Y_2 == 1) { 
-        __delay_ms(100); 
-         return '5'; 
-    }
-	if (Y_3 == 1) { 
-        __delay_ms(100); 
-        return '6'; 
-    }
-	if (Y_4 == 1) { 
-        __delay_ms(100); 
-        return 'B'; 
-    }
-	
-	X_1 = 0; X_2 = 0; X_3 = 1;	
-    __delay_ms(10);
-	if (Y_1 == 1) { 
-        __delay_ms(100); 
-        return '7'; 
-    }
-	if (Y_2 == 1) { 
-        __delay_ms(100); 
-        return '8'; 
-    }
-	if (Y_3 == 1) { 
-        __delay_ms(100); 
-        while (Y_3==1); 
-        return '9'; 
-    }
-	if (Y_4 == 1) { 
-        __delay_ms(100); 
-        return 'C'; 
-    }
-	
-	X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 1; 	
-    __delay_ms(10);
-	if (Y_1 == 1) { 
-        __delay_ms(100); 
-        while (Y_1==1); 
-        return '*'; 
-    }
-	if (Y_2 == 1) { 
-        __delay_ms(100); 
-        return '0'; 
-    }
-	if (Y_3 == 1) { 
-        __delay_ms(100); 
-        return '#'; 
-    }
-	if (Y_4 == 1) { 
-        __delay_ms(100); 
-        return 'D'; 
-    }
-	return 'n';
-    
-    
-    
+    val = data;
 }
 
 
-// Function name: GetKey
-// Read pressed key value from keypad and return its value
-char switch_press_scan(void)           	 // Get key from user
-{
-	char key = 'n';              // Assume no key pressed
-
-	while(key=='n')              // Wait until a key is pressed
-		key = keypad_scanner();   // Scan the keys again and again
-        __delay_ms(100);
-    
-	return key;                  //when key pressed then return its value
-}
 
 void pwm_init(){
     CCP1CON = 0;    //clear CCP1CON
