@@ -56,6 +56,10 @@ void lcddata(unsigned char);
 void MSDelay(unsigned int itime);
 void writeString(unsigned char sendData[]);
 
+//PWM///////////////////////////
+void pwm_init(void);
+void pwm_set(char value[]);
+/////////////////////////////////
 
 unsigned char data[] = "Project5";
 unsigned int i=0;
@@ -85,15 +89,15 @@ InitKeypad();
 while(1)
 {
  // Code to test display only.  Will flash Project5 every second
-    writeString(data);
-    __delay_ms(1000);
-    lcdcmd(0x01);
-    __delay_ms(1000);
+//    writeString(data);
+//    __delay_ms(1000);
+//    lcdcmd(0x01);
+//    __delay_ms(1000);
 ////////////////////////////////////////////
     
-// Code to test keypad    
-//    key = switch_press_scan();
-//    lcddata(key);
+ //Code to test keypad    
+    key = switch_press_scan();
+    lcddata(key);
     
 //////////////////////////////////////    
 }
@@ -142,7 +146,7 @@ en=0;
 
 void InitKeypad(void)
 {
-	Keypad_PORT	    = 0x00;	// Set Keypad port pin values zero
+	Keypad_PORT	= 0x00;	// Set Keypad port pin values zero
 	Keypad_PORT_Direction = 0xF0;	// Last 4 pins input, First 4 pins output
 
 	
@@ -151,62 +155,235 @@ void InitKeypad(void)
 
 char keypad_scanner(void)	
 {	
-	X_1 = 1; X_2 = 0; X_3 = 0; X_4 = 0; 	//Scan first Row
-    __delay_ms(50);
+    
+    //Jorge's code
+//    X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 0; 	//Scan first Row
+//    X_1 = 1;
+//    __delay_ms(50);
+//	if (X_1 == 1 && Y_1 == 1) { 
+//        __delay_ms(100); 
+//        return '1'; 
+//    } //Col 1 pressed
+//	if (X_1 == 1 && Y_2 == 1) { 
+//        __delay_ms(100); 
+//        return '2'; 
+//    } //Col 2 pressed
+//	if (X_1 == 1 && Y_3 == 1) { 
+//        __delay_ms(100); 
+//        return '3'; 
+//    } //Col 3 pressed
+//	if (X_1 == 1 && Y_4 == 1) { 
+//        __delay_ms(100);  
+//        return 'A'; 
+//    } //Col 4 pressed
+//
+//	X_1 = 0; X_2 = 1;	//Scan second Row
+//    __delay_ms(50);
+//	if (X_2 == 1 && Y_1 == 1) { 
+//        __delay_ms(100); 
+//        return '4'; 
+//    }
+//	if (X_2 == 1 && Y_2 == 1) { 
+//        __delay_ms(100); 
+//         return '5'; 
+//    }
+//	if (X_2 == 1 && Y_3 == 1) { 
+//        __delay_ms(100); 
+//        return '6'; 
+//    }
+//	if (X_2 == 1 && Y_4 == 1) { 
+//        __delay_ms(100); 
+//        return 'B'; 
+//    }
+//	
+//	X_1 = 0; X_2 = 0; X_3 = 1;	
+//    __delay_ms(50);
+//	if (X_3 == 1 && Y_1 == 1) { 
+//        __delay_ms(100); 
+//        return '7'; 
+//    }
+//	if (X_3 == 1 && Y_2 == 1) { 
+//        __delay_ms(100); 
+//        return '8'; 
+//    }
+//	if (X_3 == 1 && Y_3 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_3==1); 
+//        return '9'; 
+//    }
+//	if (X_3 == 1 && Y_4 == 1) { 
+//        __delay_ms(100); 
+//        return 'C'; 
+//    }
+//	
+//	X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 1; 	
+//    __delay_ms(50);
+//	if (X_4 == 1 && Y_1 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_1==1); 
+//        return '*'; 
+//    }
+//	if (X_4 == 1 && Y_2 == 1) { 
+//        __delay_ms(100); 
+//        return '0'; 
+//    }
+//	if (X_4 == 1 && Y_3 == 1) { 
+//        __delay_ms(100); 
+//        return '#'; 
+//    }
+//	if (X_4 == 1 && Y_4 == 1) { 
+//        __delay_ms(100); 
+//        return 'D'; 
+//    }
+//	return 'n';
+    
+    
+    
+    
+    //Jason's Code
+//	X_1 = 1; X_2 = 0; X_3 = 0; X_4 = 0; 	//Scan first Row
+//    __delay_ms(50);
+//	if (Y_1 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_1==1); 
+//        return '1'; 
+//    } //Col 1 pressed
+//	if (Y_2 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_2==1); 
+//        return '2'; 
+//    } //Col 2 pressed
+//	if (Y_3 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_3==1); 
+//        return '3'; 
+//    } //Col 3 pressed
+//	if (Y_4 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_4==1); 
+//        return 'A'; 
+//    } //Col 4 pressed
+//
+//	X_1 = 0; X_2 = 1; X_3 = 0; X_4 = 0; 	//Scan second Row
+//    __delay_ms(50);
+//	if (Y_1 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_1==1); 
+//        return '4'; 
+//    }
+//	if (Y_2 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_2==1); 
+//        return '5'; 
+//    }
+//	if (Y_3 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_3==1); 
+//        return '6'; 
+//    }
+//	if (Y_4 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_4==1); 
+//        return 'B'; 
+//    }
+//	
+//	X_1 = 0; X_2 = 0; X_3 = 1; X_4 = 0; 	
+//    __delay_ms(50);
+//	if (Y_1 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_1==1); 
+//        return '7'; 
+//    }
+//	if (Y_2 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_2==1); 
+//        return '8'; 
+//    }
+//	if (Y_3 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_3==1); 
+//        return '9'; 
+//    }
+//	if (Y_4 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_4==1); 
+//        return 'C'; 
+//    }
+//	
+//	X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 1; 	
+//    __delay_ms(50);
+//	if (Y_1 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_1==1); 
+//        return '*'; 
+//    }
+//	if (Y_2 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_2==1); 
+//        return '0'; 
+//    }
+//	if (Y_3 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_3==1); 
+//        return '#'; 
+//    }
+//	if (Y_4 == 1) { 
+//        __delay_ms(100); 
+//        while (Y_4==1); 
+//        return 'D'; 
+//    }
+//
+//	return 'n'; 
+    
+    
+    //Jason modify Jorge's code
+    X_1 = 1; X_2 = 0; X_3 = 0; X_4 = 0; 	//Scan first Row
+    
+    __delay_ms(10);
 	if (Y_1 == 1) { 
         __delay_ms(100); 
-        while (Y_1==1); 
         return '1'; 
     } //Col 1 pressed
 	if (Y_2 == 1) { 
         __delay_ms(100); 
-        while (Y_2==1); 
         return '2'; 
     } //Col 2 pressed
 	if (Y_3 == 1) { 
         __delay_ms(100); 
-        while (Y_3==1); 
         return '3'; 
     } //Col 3 pressed
 	if (Y_4 == 1) { 
-        __delay_ms(100); 
-        while (Y_4==1); 
+        __delay_ms(100);  
         return 'A'; 
     } //Col 4 pressed
 
-	X_1 = 0; X_2 = 1; X_3 = 0; X_4 = 0; 	//Scan second Row
-    __delay_ms(50);
+	X_1 = 0; X_2 = 1;	//Scan second Row
+    __delay_ms(10);
 	if (Y_1 == 1) { 
         __delay_ms(100); 
-        while (Y_1==1); 
         return '4'; 
     }
 	if (Y_2 == 1) { 
         __delay_ms(100); 
-        while (Y_2==1); 
-        return '5'; 
+         return '5'; 
     }
 	if (Y_3 == 1) { 
         __delay_ms(100); 
-        while (Y_3==1); 
         return '6'; 
     }
 	if (Y_4 == 1) { 
         __delay_ms(100); 
-        while (Y_4==1); 
         return 'B'; 
     }
 	
-	X_1 = 0; X_2 = 0; X_3 = 1; X_4 = 0; 	
-    __delay_ms(50);
+	X_1 = 0; X_2 = 0; X_3 = 1;	
+    __delay_ms(10);
 	if (Y_1 == 1) { 
         __delay_ms(100); 
-        while (Y_1==1); 
         return '7'; 
     }
 	if (Y_2 == 1) { 
         __delay_ms(100); 
-        while (Y_2==1); 
         return '8'; 
     }
 	if (Y_3 == 1) { 
@@ -216,12 +393,11 @@ char keypad_scanner(void)
     }
 	if (Y_4 == 1) { 
         __delay_ms(100); 
-        while (Y_4==1); 
         return 'C'; 
     }
 	
 	X_1 = 0; X_2 = 0; X_3 = 0; X_4 = 1; 	
-    __delay_ms(50);
+    __delay_ms(10);
 	if (Y_1 == 1) { 
         __delay_ms(100); 
         while (Y_1==1); 
@@ -229,21 +405,20 @@ char keypad_scanner(void)
     }
 	if (Y_2 == 1) { 
         __delay_ms(100); 
-        while (Y_2==1); 
         return '0'; 
     }
 	if (Y_3 == 1) { 
         __delay_ms(100); 
-        while (Y_3==1); 
         return '#'; 
     }
 	if (Y_4 == 1) { 
         __delay_ms(100); 
-        while (Y_4==1); 
         return 'D'; 
     }
-
-	return 'n';    
+	return 'n';
+    
+    
+    
 }
 
 
@@ -255,7 +430,23 @@ char switch_press_scan(void)           	 // Get key from user
 
 	while(key=='n')              // Wait until a key is pressed
 		key = keypad_scanner();   // Scan the keys again and again
-        __delay_ms(10);
+        __delay_ms(100);
     
 	return key;                  //when key pressed then return its value
+}
+
+void pwm_init(){
+    CCP1CON = 0;    //clear CCP1CON
+    PR2 = 124;      //[8MHz/(4 * 1KHz * 16)] - 1 = 124   Pre-scalar = 16.
+    CCPR1L = 31;    //Initialize to 10%
+    T2CON = 0x02;   //Timer2, 16 Pre-scale, no post-scalar
+    CCP1CON = 0x0C; //PWM mode, 00 for DC1B1:B0
+    TMR2 = 0;       //clear Timer2
+    T2CONbits.TMR2ON = 1; //Turn on Timer2
+}
+
+void pwm_set(char value[]){
+    int val = atoi(value);          //turn input into integer
+    float val2 = (float)val/100;    //turn integer into percentage (50 -> .5)
+    CCPR1L = 124 * val2;
 }
